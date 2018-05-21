@@ -10,7 +10,7 @@ body {
 .select-charactor {
     display: flex;
     flex-wrap: wrap;
-    width: 600px;
+    width: 680px;
     margin-top: 4px;
     .jinro-charactor {
         margin-right: 4px;
@@ -94,18 +94,20 @@ body {
     .uranai-result {
         display: flex;
         width: 70px;
-        border-right: 1px solid gray;
     }
     .result-child {
         display: flex;
         align-items: center;
         justify-content: center;
-    }
-    .result-left {
+        &.result-drop-over {
+            background-color: #ffa0a09c !important;
+        }
+        &.result-left {
         width: 50%;
-    }
-    .result-right {
-        width: 50%;
-        background-color: #d2d2d2;
+        }
+        &.result-right {
+            width: 50%;
+            background-color: #d2d2d2;
+        }
     }
 }

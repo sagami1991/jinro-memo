@@ -90,8 +90,19 @@ class UranaiRow extends React.Component<UranaiRowProps, UranaiRowStates> {
 
 }
 
-class UranaiResultView extends React.Component<{onDrop(chara: JinroCharactorProp): void}> {
-    public dragEnd(event: React.DragEvent<HTMLElement>, color: TJinroColor) {
+class UranaiResultView extends React.Component<{onDrop(chara: JinroCharactorProp): void}, {
+    onDropOver: TJinroColor
+}> {
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            onDropOver: null
+        }
+    }
+    private dragEnd(event: React.DragEvent<HTMLElement>, color: TJinroColor) {
+        this.setState({
+            onDropOver: null
+        });
         event.preventDefault();
         const data = event.dataTransfer.getData("charactor");
         if (!data) {
@@ -101,16 +112,37 @@ class UranaiResultView extends React.Component<{onDrop(chara: JinroCharactorProp
         charactor.color = color;
         this.props.onDrop(charactor);
     }
+
+    private onDropOver(color: TJinroColor) {
+        if (color !== null) {
+            setTimeout(() => {
+                    this.setState({
+                    onDropOver: color
+                });
+            }, 10);
+            return;
+        }
+        this.setState({
+            onDropOver: color
+        });
+    }
+
     public render() {
         return (
-        <div className="uranai-result">
-            <div className="result-child result-left"
+        <div className="uranai-result"
+            onDragLeave ={() => this.onDropOver(null)}
+        >
+            <div className={"result-child result-left " + (this.state.onDropOver === "white" ? "result-drop-over" : "")}
              onDragOver={(e) => e.preventDefault()}
-             onDrop={(e) => this.dragEnd(e, "white")}>
+             onDrop={(e) => this.dragEnd(e, "white")}
+             onDragEnter ={() => this.onDropOver("white")}
+             >
              白</div>
-            <div className="result-child result-right"
+            <div className={"result-child result-right " + (this.state.onDropOver === "black" ? "result-drop-over" : "")}
              onDragOver={(e) => e.preventDefault()}
-             onDrop={(e) => this.dragEnd(e, "black")}>
+             onDrop={(e) => this.dragEnd(e, "black")}
+             onDragEnter ={() => this.onDropOver("black")}
+             >
              黒</div>
         </div>
         );
@@ -127,18 +159,24 @@ interface JinroCharactorProp {
     isUranaishi?: true;
     isSelectable?: true;
     onRemove?(name: string): void;
+    onDrop?(event: React.DragEvent<HTMLElement>): void;
 }
 
 class JinroCharactor extends React.Component<JinroCharactorProp> {
     constructor(props: JinroCharactorProp) {
         super(props);
     }
-    public onDragStart(event: React.DragEvent<HTMLElement>) {
+
+    private onDragStart(event: React.DragEvent<HTMLElement>) {
         event.dataTransfer.setData("charactor", JSON.stringify(this.props));
     }
+
     public render() {
         return (
-        <div className="jinro-charactor" draggable={true} onDragStart={(e) => this.onDragStart(e)}>
+        <div className="jinro-charactor" draggable={true} onDragStart={(e) => this.onDragStart(e)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => this.props.onDrop && this.props.onDrop(e)}
+            >
             <img src={"charactor/" + this.props.image} className="charactor-image" />
             {(() => {
                 if (this.props.isUranaishi) {
@@ -178,13 +216,29 @@ class SelectCharctorView extends React.Component<{}, {charactors: ICharactor[]}>
         });
     }
 
+    private dragEnd(event: React.DragEvent<HTMLElement>, newIndex: number) {
+        event.preventDefault();
+        const data = event.dataTransfer.getData("charactor");
+        if (!data) {
+            return;
+        }
+        const charactor: JinroCharactorProp = JSON.parse(data);
+        const oldIndex = this.state.charactors.findIndex((chara) => chara.name === charactor.name);
+        const temp = this.state.charactors[oldIndex];
+        this.state.charactors[oldIndex] = this.state.charactors[newIndex];
+        this.state.charactors[newIndex] = temp;
+        this.forceUpdate();
+    }
+
     public render() {
         return (
             <div className="select-charactor">
             {this.state.charactors.map((chara, i) => {
                 return (<JinroCharactor name={chara.name}
                   onRemove={(name) => this.onRemove(name)}
-                 image={chara.image} isSelectable={true} key={i} />);
+                 image={chara.image} isSelectable={true} key={i}
+                 onDrop={(e) => this.dragEnd(e, i)}
+                  />);
             })}
             </div>
         );

@@ -60,319 +60,11 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 12);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const React = __webpack_require__(8);
-const ReactDOM = __webpack_require__(18);
-const charactors_1 = __webpack_require__(2);
-const util_1 = __webpack_require__(1);
-class UranaiRow extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            uranaiShi: undefined,
-            uranaiResults: []
-        };
-    }
-    getText() {
-        if (!this.state.uranaiShi) {
-            return "";
-        }
-        return `${this.state.uranaiShi.name}→${this.state.uranaiResults.map((person) => {
-            return `${person.name}${person.color === "white" ? "○" : "●"}`;
-        }).join("")}`;
-    }
-    dragEnd(event) {
-        event.preventDefault();
-        if (this.state.uranaiShi) {
-            return;
-        }
-        const data = event.dataTransfer.getData("charactor");
-        if (!data) {
-            return;
-        }
-        const charactor = JSON.parse(data);
-        this.setState({
-            uranaiShi: charactor
-        });
-    }
-    addResults(chara) {
-        const charactor = Object.assign({}, chara, { id: util_1.MathUtil.createKey() });
-        this.state.uranaiResults.push(charactor);
-        this.forceUpdate();
-    }
-    onRemove(id) {
-        this.setState({
-            uranaiResults: this.state.uranaiResults.filter((person) => person.id !== id)
-        });
-    }
-    render() {
-        return (React.createElement("div", { className: "uranai-row" },
-            React.createElement("div", { className: "uranai", onDragOver: (e) => e.preventDefault(), onDrop: (e) => this.dragEnd(e) }, this.state.uranaiShi ?
-                React.createElement(JinroCharactor, { name: this.state.uranaiShi.name, image: this.state.uranaiShi.image, isUranaishi: true })
-                : "占い師"),
-            React.createElement("div", { className: "uranai-results" }, this.state.uranaiResults.map((result) => {
-                return (React.createElement("div", { className: "uranai-result", key: result.id },
-                    React.createElement(JinroCharactor, { name: result.name, image: result.image, color: result.color }),
-                    React.createElement("button", { className: "remove-result", onClick: () => this.onRemove(result.id) }, "\u2715")));
-            })),
-            React.createElement(UranaiResultView, { onDrop: (chara) => this.addResults(chara) }),
-            React.createElement("button", { className: "remove-uranai-row", onClick: this.props.onRemove }, "\u2715")));
-    }
-}
-class UranaiResultView extends React.Component {
-    dragEnd(event, color) {
-        event.preventDefault();
-        const data = event.dataTransfer.getData("charactor");
-        if (!data) {
-            return;
-        }
-        const charactor = JSON.parse(data);
-        charactor.color = color;
-        this.props.onDrop(charactor);
-    }
-    render() {
-        return (React.createElement("div", { className: "uranai-result" },
-            React.createElement("div", { className: "result-child result-left", onDragOver: (e) => e.preventDefault(), onDrop: (e) => this.dragEnd(e, "white") }, "\u767D"),
-            React.createElement("div", { className: "result-child result-right", onDragOver: (e) => e.preventDefault(), onDrop: (e) => this.dragEnd(e, "black") }, "\u9ED2")));
-    }
-}
-class JinroCharactor extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-    onDragStart(event) {
-        event.dataTransfer.setData("charactor", JSON.stringify(this.props));
-    }
-    render() {
-        return (React.createElement("div", { className: "jinro-charactor", draggable: true, onDragStart: (e) => this.onDragStart(e) },
-            React.createElement("img", { src: "charactor/" + this.props.image, className: "charactor-image" }),
-            (() => {
-                if (this.props.isUranaishi) {
-                    return (React.createElement("div", { className: "chara-mark chara-mark-uranai" }, "\u5360\u3044\u5E2B"));
-                }
-                if (this.props.color === "white") {
-                    return (React.createElement("div", { className: "chara-mark chara-mark-white" }, "\u4EBA\u72FC\u3067\u306A\u3044"));
-                }
-                if (this.props.color === "black") {
-                    return (React.createElement("div", { className: "chara-mark chara-mark-black" }, "\u4EBA\u72FC"));
-                }
-            })(),
-            (() => {
-                if (this.props.isSelectable) {
-                    return (React.createElement("button", { className: "remove-charactor", onClick: () => this.props.onRemove(this.props.name) }, "\u2715"));
-                }
-            })()));
-    }
-}
-class SelectCharctorView extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            charactors: charactors_1.CHARACTORS
-        };
-    }
-    onRemove(name) {
-        this.setState({
-            charactors: this.state.charactors.filter((chara) => chara.name !== name)
-        });
-    }
-    render() {
-        return (React.createElement("div", { className: "select-charactor" }, this.state.charactors.map((chara, i) => {
-            return (React.createElement(JinroCharactor, { name: chara.name, onRemove: (name) => this.onRemove(name), image: chara.image, isSelectable: true, key: i }));
-        })));
-    }
-}
-class MainView extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            uranaiRows: [util_1.MathUtil.createKey()],
-            copyText: ""
-        };
-        this.uranaiRows = [];
-    }
-    onAddClick() {
-        this.state.uranaiRows.push(util_1.MathUtil.createKey());
-        this.forceUpdate();
-    }
-    onCopyClick() {
-        const copyText = this.uranaiRows.map((row) => row.getText()).join("\r\n");
-        this.setState({
-            copyText: this.uranaiRows.map((row) => row.getText()).join("\r\n")
-        });
-        const copyTextElement = document.querySelector(".copy-text-area");
-        copyTextElement.textContent = copyText;
-        copyTextElement.select();
-        const copyResult = document.execCommand("copy");
-    }
-    removeRow(id) {
-        const deleteIndex = this.state.uranaiRows.findIndex((ida) => ida === id);
-        this.state.uranaiRows.splice(deleteIndex, 1);
-        this.setState({ uranaiRows: this.state.uranaiRows });
-    }
-    render() {
-        const uranaiRows = this.state.uranaiRows.map((id) => {
-            return (React.createElement(UranaiRow, { key: id, onRemove: () => this.removeRow(id), ref: (instance) => {
-                    if (instance) {
-                        this.uranaiRows.push(instance);
-                    }
-                    else {
-                        this.uranaiRows = [];
-                    }
-                } }));
-        });
-        return (React.createElement("div", null,
-            uranaiRows,
-            React.createElement("button", { onClick: () => this.onAddClick() }, "\u8FFD\u52A0"),
-            React.createElement("button", { onClick: () => this.onCopyClick() }, "\u30C6\u30AD\u30B9\u30C8\u30B3\u30D4\u30FC"),
-            React.createElement(SelectCharctorView, null)));
-    }
-}
-ReactDOM.render(React.createElement(MainView, null), document.querySelector(".main"));
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-class ElementUtil {
-    static builder(html) {
-        const container = document.createElement("div");
-        container.innerHTML = html;
-        if (container.children.length !== 1) {
-            throw new Error(`親要素はひとつまで 数: ${container.children.length} html: ${html}`);
-        }
-        const element = container.firstElementChild;
-        container.removeChild(element);
-        return element;
-    }
-    static getSvgIcon(icon, size = "m", className) {
-        return `
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon-svg icon-${size} ${className || ""}">
-            <use xlink:href="#${icon}"/>
-        </svg>`;
-    }
-}
-exports.ElementUtil = ElementUtil;
-class MathUtil {
-    static average(array) {
-        return MathUtil.sum(array) / array.length;
-    }
-    static sum(array) {
-        let sum = 0;
-        for (const num of array) {
-            sum += num;
-        }
-        return sum;
-    }
-    static getIndexOfMaxValue(array) {
-        return array.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
-    }
-    static tail(array) {
-        return array[array.length - 1];
-    }
-    static createKey() {
-        return "_" + Math.random().toString(36).substr(2, 9);
-    }
-}
-exports.MathUtil = MathUtil;
-
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CHARACTORS = [
-    {
-        name: "スーザン",
-        image: "Screenshot_60.jpg"
-    }, {
-        name: "ロディ",
-        image: "Screenshot_61.jpg"
-    }, {
-        name: "エマ",
-        image: "Screenshot_62.jpg"
-    }, {
-        name: "フランク",
-        image: "Screenshot_63.jpg"
-    }, {
-        name: "トーマス",
-        image: "Screenshot_64.jpg"
-    }, {
-        name: "クリス",
-        image: "Screenshot_66.jpg"
-    }, {
-        name: "ジェシカ",
-        image: "Screenshot_67.jpg"
-    }, {
-        name: "サンドラ",
-        image: "Screenshot_68.jpg"
-    }, {
-        name: "フェイ",
-        image: "Screenshot_69.jpg"
-    }, {
-        name: "ヒュー",
-        image: "Screenshot_70.jpg"
-    }, {
-        name: "アンナ",
-        image: "Screenshot_71.jpg"
-    }, {
-        name: "マイク",
-        image: "Screenshot_72.jpg"
-    }, {
-        name: "エリック",
-        image: "Screenshot_73.jpg"
-    }, {
-        name: "バニラ",
-        image: "Screenshot_75.jpg"
-    }, {
-        name: "メアリー",
-        image: "Screenshot_76.jpg"
-    }, {
-        name: "ジェイ",
-        image: "Screenshot_77.jpg"
-    }, {
-        name: "ショーン",
-        image: "Screenshot_78.jpg"
-    }, {
-        name: "ローラ",
-        image: "Screenshot_79.jpg"
-    }, {
-        name: "ビル",
-        image: "Screenshot_80.jpg"
-    }, {
-        name: "ミカ",
-        image: "Screenshot_81.jpg"
-    }, {
-        name: "リリアン",
-        image: "Screenshot_82.jpg"
-    }, {
-        name: "メリル",
-        image: "Screenshot_83.jpg"
-    }, {
-        name: "ゲイル",
-        image: "Screenshot_84.jpg"
-    }
-];
-
-
-/***/ }),
-/* 3 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -562,7 +254,7 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 4 */
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -619,10 +311,10 @@ function invariant(condition, format, a, b, c, d, e, f) {
 }
 
 module.exports = invariant;
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 5 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -664,7 +356,7 @@ emptyFunction.thatReturnsArgument = function (arg) {
 module.exports = emptyFunction;
 
 /***/ }),
-/* 6 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -761,7 +453,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 
 
 /***/ }),
-/* 7 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -782,25 +474,25 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 module.exports = emptyObject;
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 8 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(15);
+  module.exports = __webpack_require__(13);
 } else {
-  module.exports = __webpack_require__(16);
+  module.exports = __webpack_require__(14);
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 9 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -814,7 +506,7 @@ if (process.env.NODE_ENV === 'production') {
 
 
 
-var emptyFunction = __webpack_require__(5);
+var emptyFunction = __webpack_require__(2);
 
 /**
  * Similar to invariant but only logs a warning if the condition is not met.
@@ -866,10 +558,10 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 module.exports = warning;
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 10 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -883,9 +575,9 @@ module.exports = warning;
 
 
 if (process.env.NODE_ENV !== 'production') {
-  var invariant = __webpack_require__(4);
-  var warning = __webpack_require__(9);
-  var ReactPropTypesSecret = __webpack_require__(17);
+  var invariant = __webpack_require__(1);
+  var warning = __webpack_require__(6);
+  var ReactPropTypesSecret = __webpack_require__(15);
   var loggedTypeFailures = {};
 }
 
@@ -933,10 +625,10 @@ function checkPropTypes(typeSpecs, values, location, componentName, getStack) {
 
 module.exports = checkPropTypes;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 11 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -975,7 +667,7 @@ var ExecutionEnvironment = {
 module.exports = ExecutionEnvironment;
 
 /***/ }),
-/* 12 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1017,7 +709,7 @@ function getActiveElement(doc) /*?DOMElement*/{
 module.exports = getActiveElement;
 
 /***/ }),
-/* 13 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1088,7 +780,7 @@ function shallowEqual(objA, objB) {
 module.exports = shallowEqual;
 
 /***/ }),
-/* 14 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1103,7 +795,7 @@ module.exports = shallowEqual;
  * 
  */
 
-var isTextNode = __webpack_require__(20);
+var isTextNode = __webpack_require__(18);
 
 /*eslint-disable no-bitwise */
 
@@ -1131,7 +823,219 @@ function containsNode(outerNode, innerNode) {
 module.exports = containsNode;
 
 /***/ }),
-/* 15 */
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const React = __webpack_require__(5);
+const ReactDOM = __webpack_require__(16);
+const charactors_1 = __webpack_require__(25);
+const util_1 = __webpack_require__(26);
+class UranaiRow extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            uranaiShi: undefined,
+            uranaiResults: []
+        };
+    }
+    getText() {
+        if (!this.state.uranaiShi) {
+            return "";
+        }
+        return `${this.state.uranaiShi.name}→${this.state.uranaiResults.map((person) => {
+            return `${person.name}${person.color === "white" ? "○" : "●"}`;
+        }).join("")}`;
+    }
+    dragEnd(event) {
+        event.preventDefault();
+        if (this.state.uranaiShi) {
+            return;
+        }
+        const data = event.dataTransfer.getData("charactor");
+        if (!data) {
+            return;
+        }
+        const charactor = JSON.parse(data);
+        this.setState({
+            uranaiShi: charactor
+        });
+    }
+    addResults(chara) {
+        const charactor = Object.assign({}, chara, { id: util_1.MathUtil.createKey() });
+        this.state.uranaiResults.push(charactor);
+        this.forceUpdate();
+    }
+    onRemove(id) {
+        this.setState({
+            uranaiResults: this.state.uranaiResults.filter((person) => person.id !== id)
+        });
+    }
+    render() {
+        return (React.createElement("div", { className: "uranai-row" },
+            React.createElement("div", { className: "uranai", onDragOver: (e) => e.preventDefault(), onDrop: (e) => this.dragEnd(e) }, this.state.uranaiShi ?
+                React.createElement(JinroCharactor, { name: this.state.uranaiShi.name, image: this.state.uranaiShi.image, isUranaishi: true })
+                : "占い師"),
+            React.createElement("div", { className: "uranai-results" }, this.state.uranaiResults.map((result) => {
+                return (React.createElement("div", { className: "uranai-result", key: result.id },
+                    React.createElement(JinroCharactor, { name: result.name, image: result.image, color: result.color }),
+                    React.createElement("button", { className: "remove-result", onClick: () => this.onRemove(result.id) }, "\u2715")));
+            })),
+            React.createElement(UranaiResultView, { onDrop: (chara) => this.addResults(chara) }),
+            React.createElement("button", { className: "remove-uranai-row", onClick: this.props.onRemove }, "\u2715")));
+    }
+}
+class UranaiResultView extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            onDropOver: null
+        };
+    }
+    dragEnd(event, color) {
+        this.setState({
+            onDropOver: null
+        });
+        event.preventDefault();
+        const data = event.dataTransfer.getData("charactor");
+        if (!data) {
+            return;
+        }
+        const charactor = JSON.parse(data);
+        charactor.color = color;
+        this.props.onDrop(charactor);
+    }
+    onDropOver(color) {
+        if (color !== null) {
+            setTimeout(() => {
+                this.setState({
+                    onDropOver: color
+                });
+            }, 10);
+            return;
+        }
+        this.setState({
+            onDropOver: color
+        });
+    }
+    render() {
+        return (React.createElement("div", { className: "uranai-result", onDragLeave: () => this.onDropOver(null) },
+            React.createElement("div", { className: "result-child result-left " + (this.state.onDropOver === "white" ? "result-drop-over" : ""), onDragOver: (e) => e.preventDefault(), onDrop: (e) => this.dragEnd(e, "white"), onDragEnter: () => this.onDropOver("white") }, "\u767D"),
+            React.createElement("div", { className: "result-child result-right " + (this.state.onDropOver === "black" ? "result-drop-over" : ""), onDragOver: (e) => e.preventDefault(), onDrop: (e) => this.dragEnd(e, "black"), onDragEnter: () => this.onDropOver("black") }, "\u9ED2")));
+    }
+}
+class JinroCharactor extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+    onDragStart(event) {
+        event.dataTransfer.setData("charactor", JSON.stringify(this.props));
+    }
+    render() {
+        return (React.createElement("div", { className: "jinro-charactor", draggable: true, onDragStart: (e) => this.onDragStart(e), onDragOver: (e) => e.preventDefault(), onDrop: (e) => this.props.onDrop && this.props.onDrop(e) },
+            React.createElement("img", { src: "charactor/" + this.props.image, className: "charactor-image" }),
+            (() => {
+                if (this.props.isUranaishi) {
+                    return (React.createElement("div", { className: "chara-mark chara-mark-uranai" }, "\u5360\u3044\u5E2B"));
+                }
+                if (this.props.color === "white") {
+                    return (React.createElement("div", { className: "chara-mark chara-mark-white" }, "\u4EBA\u72FC\u3067\u306A\u3044"));
+                }
+                if (this.props.color === "black") {
+                    return (React.createElement("div", { className: "chara-mark chara-mark-black" }, "\u4EBA\u72FC"));
+                }
+            })(),
+            (() => {
+                if (this.props.isSelectable) {
+                    return (React.createElement("button", { className: "remove-charactor", onClick: () => this.props.onRemove(this.props.name) }, "\u2715"));
+                }
+            })()));
+    }
+}
+class SelectCharctorView extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            charactors: charactors_1.CHARACTORS
+        };
+    }
+    onRemove(name) {
+        this.setState({
+            charactors: this.state.charactors.filter((chara) => chara.name !== name)
+        });
+    }
+    dragEnd(event, newIndex) {
+        event.preventDefault();
+        const data = event.dataTransfer.getData("charactor");
+        if (!data) {
+            return;
+        }
+        const charactor = JSON.parse(data);
+        const oldIndex = this.state.charactors.findIndex((chara) => chara.name === charactor.name);
+        const temp = this.state.charactors[oldIndex];
+        this.state.charactors[oldIndex] = this.state.charactors[newIndex];
+        this.state.charactors[newIndex] = temp;
+        this.forceUpdate();
+    }
+    render() {
+        return (React.createElement("div", { className: "select-charactor" }, this.state.charactors.map((chara, i) => {
+            return (React.createElement(JinroCharactor, { name: chara.name, onRemove: (name) => this.onRemove(name), image: chara.image, isSelectable: true, key: i, onDrop: (e) => this.dragEnd(e, i) }));
+        })));
+    }
+}
+class MainView extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            uranaiRows: [util_1.MathUtil.createKey()],
+            copyText: ""
+        };
+        this.uranaiRows = [];
+    }
+    onAddClick() {
+        this.state.uranaiRows.push(util_1.MathUtil.createKey());
+        this.forceUpdate();
+    }
+    onCopyClick() {
+        const copyText = this.uranaiRows.map((row) => row.getText()).join("\r\n");
+        this.setState({
+            copyText: this.uranaiRows.map((row) => row.getText()).join("\r\n")
+        });
+        const copyTextElement = document.querySelector(".copy-text-area");
+        copyTextElement.textContent = copyText;
+        copyTextElement.select();
+        const copyResult = document.execCommand("copy");
+    }
+    removeRow(id) {
+        const deleteIndex = this.state.uranaiRows.findIndex((ida) => ida === id);
+        this.state.uranaiRows.splice(deleteIndex, 1);
+        this.setState({ uranaiRows: this.state.uranaiRows });
+    }
+    render() {
+        const uranaiRows = this.state.uranaiRows.map((id) => {
+            return (React.createElement(UranaiRow, { key: id, onRemove: () => this.removeRow(id), ref: (instance) => {
+                    if (instance) {
+                        this.uranaiRows.push(instance);
+                    }
+                    else {
+                        this.uranaiRows = [];
+                    }
+                } }));
+        });
+        return (React.createElement("div", null,
+            uranaiRows,
+            React.createElement("button", { onClick: () => this.onAddClick() }, "\u8FFD\u52A0"),
+            React.createElement("button", { onClick: () => this.onCopyClick() }, "\u30C6\u30AD\u30B9\u30C8\u30B3\u30D4\u30FC"),
+            React.createElement(SelectCharctorView, null)));
+    }
+}
+ReactDOM.render(React.createElement(MainView, null), document.querySelector(".main"));
+
+
+/***/ }),
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1144,7 +1048,7 @@ module.exports = containsNode;
  * LICENSE file in the root directory of this source tree.
  */
 
-var m=__webpack_require__(6),n=__webpack_require__(4),p=__webpack_require__(7),q=__webpack_require__(5),r="function"===typeof Symbol&&Symbol["for"],t=r?Symbol["for"]("react.element"):60103,u=r?Symbol["for"]("react.portal"):60106,v=r?Symbol["for"]("react.fragment"):60107,w=r?Symbol["for"]("react.strict_mode"):60108,x=r?Symbol["for"]("react.provider"):60109,y=r?Symbol["for"]("react.context"):60110,z=r?Symbol["for"]("react.async_mode"):60111,A=r?Symbol["for"]("react.forward_ref"):
+var m=__webpack_require__(3),n=__webpack_require__(1),p=__webpack_require__(4),q=__webpack_require__(2),r="function"===typeof Symbol&&Symbol["for"],t=r?Symbol["for"]("react.element"):60103,u=r?Symbol["for"]("react.portal"):60106,v=r?Symbol["for"]("react.fragment"):60107,w=r?Symbol["for"]("react.strict_mode"):60108,x=r?Symbol["for"]("react.provider"):60109,y=r?Symbol["for"]("react.context"):60110,z=r?Symbol["for"]("react.async_mode"):60111,A=r?Symbol["for"]("react.forward_ref"):
 60112,B="function"===typeof Symbol&&Symbol.iterator;function C(a){for(var b=arguments.length-1,e="http://reactjs.org/docs/error-decoder.html?invariant\x3d"+a,c=0;c<b;c++)e+="\x26args[]\x3d"+encodeURIComponent(arguments[c+1]);n(!1,"Minified React error #"+a+"; visit %s for the full message or use the non-minified dev environment for full errors and additional helpful warnings. ",e)}var D={isMounted:function(){return!1},enqueueForceUpdate:function(){},enqueueReplaceState:function(){},enqueueSetState:function(){}};
 function E(a,b,e){this.props=a;this.context=b;this.refs=p;this.updater=e||D}E.prototype.isReactComponent={};E.prototype.setState=function(a,b){"object"!==typeof a&&"function"!==typeof a&&null!=a?C("85"):void 0;this.updater.enqueueSetState(this,a,b,"setState")};E.prototype.forceUpdate=function(a){this.updater.enqueueForceUpdate(this,a,"forceUpdate")};function F(){}F.prototype=E.prototype;function G(a,b,e){this.props=a;this.context=b;this.refs=p;this.updater=e||D}var H=G.prototype=new F;
 H.constructor=G;m(H,E.prototype);H.isPureReactComponent=!0;var I={current:null},J=Object.prototype.hasOwnProperty,K={key:!0,ref:!0,__self:!0,__source:!0};
@@ -1160,7 +1064,7 @@ Y=X&&W||X;module.exports=Y["default"]?Y["default"]:Y;
 
 
 /***/ }),
-/* 16 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1181,12 +1085,12 @@ if (process.env.NODE_ENV !== "production") {
   (function() {
 'use strict';
 
-var _assign = __webpack_require__(6);
-var invariant = __webpack_require__(4);
-var emptyObject = __webpack_require__(7);
-var warning = __webpack_require__(9);
-var emptyFunction = __webpack_require__(5);
-var checkPropTypes = __webpack_require__(10);
+var _assign = __webpack_require__(3);
+var invariant = __webpack_require__(1);
+var emptyObject = __webpack_require__(4);
+var warning = __webpack_require__(6);
+var emptyFunction = __webpack_require__(2);
+var checkPropTypes = __webpack_require__(7);
 
 // TODO: this is special because it gets imported during build.
 
@@ -2579,10 +2483,10 @@ module.exports = react;
   })();
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 17 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2601,7 +2505,7 @@ module.exports = ReactPropTypesSecret;
 
 
 /***/ }),
-/* 18 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2639,15 +2543,15 @@ if (process.env.NODE_ENV === 'production') {
   // DCE check should happen before ReactDOM bundle executes so that
   // DevTools can report bad minification during injection.
   checkDCE();
-  module.exports = __webpack_require__(19);
+  module.exports = __webpack_require__(17);
 } else {
-  module.exports = __webpack_require__(22);
+  module.exports = __webpack_require__(20);
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 19 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2663,7 +2567,7 @@ if (process.env.NODE_ENV === 'production') {
 /*
  Modernizr 3.0.0pre (Custom Build) | MIT
 */
-var ba=__webpack_require__(4),ea=__webpack_require__(8),m=__webpack_require__(11),A=__webpack_require__(6),C=__webpack_require__(5),fa=__webpack_require__(12),ha=__webpack_require__(13),ja=__webpack_require__(14),ka=__webpack_require__(7);
+var ba=__webpack_require__(1),ea=__webpack_require__(5),m=__webpack_require__(8),A=__webpack_require__(3),C=__webpack_require__(2),fa=__webpack_require__(9),ha=__webpack_require__(10),ja=__webpack_require__(11),ka=__webpack_require__(4);
 function D(a){for(var b=arguments.length-1,c="http://reactjs.org/docs/error-decoder.html?invariant\x3d"+a,d=0;d<b;d++)c+="\x26args[]\x3d"+encodeURIComponent(arguments[d+1]);ba(!1,"Minified React error #"+a+"; visit %s for the full message or use the non-minified dev environment for full errors and additional helpful warnings. ",c)}ea?void 0:D("227");
 function ma(a,b,c,d,e,f,h,g,k){this._hasCaughtError=!1;this._caughtError=null;var v=Array.prototype.slice.call(arguments,3);try{b.apply(c,v)}catch(l){this._caughtError=l,this._hasCaughtError=!0}}
 var E={_caughtError:null,_hasCaughtError:!1,_rethrowError:null,_hasRethrowError:!1,invokeGuardedCallback:function(a,b,c,d,e,f,h,g,k){ma.apply(E,arguments)},invokeGuardedCallbackAndCatchFirstError:function(a,b,c,d,e,f,h,g,k){E.invokeGuardedCallback.apply(this,arguments);if(E.hasCaughtError()){var v=E.clearCaughtError();E._hasRethrowError||(E._hasRethrowError=!0,E._rethrowError=v)}},rethrowCaughtError:function(){return na.apply(E,arguments)},hasCaughtError:function(){return E._hasCaughtError},clearCaughtError:function(){if(E._hasCaughtError){var a=
@@ -2900,7 +2804,7 @@ X.injectIntoDevTools({findFiberByHostInstance:Ua,bundleType:0,version:"16.3.2",r
 
 
 /***/ }),
-/* 20 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2915,7 +2819,7 @@ X.injectIntoDevTools({findFiberByHostInstance:Ua,bundleType:0,version:"16.3.2",r
  * @typechecks
  */
 
-var isNode = __webpack_require__(21);
+var isNode = __webpack_require__(19);
 
 /**
  * @param {*} object The object to check.
@@ -2928,7 +2832,7 @@ function isTextNode(object) {
 module.exports = isTextNode;
 
 /***/ }),
-/* 21 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2956,7 +2860,7 @@ function isNode(object) {
 module.exports = isNode;
 
 /***/ }),
-/* 22 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2977,19 +2881,19 @@ if (process.env.NODE_ENV !== "production") {
   (function() {
 'use strict';
 
-var invariant = __webpack_require__(4);
-var React = __webpack_require__(8);
-var warning = __webpack_require__(9);
-var ExecutionEnvironment = __webpack_require__(11);
-var _assign = __webpack_require__(6);
-var emptyFunction = __webpack_require__(5);
-var checkPropTypes = __webpack_require__(10);
-var getActiveElement = __webpack_require__(12);
-var shallowEqual = __webpack_require__(13);
-var containsNode = __webpack_require__(14);
-var emptyObject = __webpack_require__(7);
-var hyphenateStyleName = __webpack_require__(23);
-var camelizeStyleName = __webpack_require__(25);
+var invariant = __webpack_require__(1);
+var React = __webpack_require__(5);
+var warning = __webpack_require__(6);
+var ExecutionEnvironment = __webpack_require__(8);
+var _assign = __webpack_require__(3);
+var emptyFunction = __webpack_require__(2);
+var checkPropTypes = __webpack_require__(7);
+var getActiveElement = __webpack_require__(9);
+var shallowEqual = __webpack_require__(10);
+var containsNode = __webpack_require__(11);
+var emptyObject = __webpack_require__(4);
+var hyphenateStyleName = __webpack_require__(21);
+var camelizeStyleName = __webpack_require__(23);
 
 // Relying on the `invariant()` implementation lets us
 // have preserve the format and params in the www builds.
@@ -19615,10 +19519,10 @@ module.exports = reactDom;
   })();
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 23 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19633,7 +19537,7 @@ module.exports = reactDom;
 
 
 
-var hyphenate = __webpack_require__(24);
+var hyphenate = __webpack_require__(22);
 
 var msPattern = /^ms-/;
 
@@ -19660,7 +19564,7 @@ function hyphenateStyleName(string) {
 module.exports = hyphenateStyleName;
 
 /***/ }),
-/* 24 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19696,7 +19600,7 @@ function hyphenate(string) {
 module.exports = hyphenate;
 
 /***/ }),
-/* 25 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19711,7 +19615,7 @@ module.exports = hyphenate;
 
 
 
-var camelize = __webpack_require__(26);
+var camelize = __webpack_require__(24);
 
 var msPattern = /^-ms-/;
 
@@ -19739,7 +19643,7 @@ function camelizeStyleName(string) {
 module.exports = camelizeStyleName;
 
 /***/ }),
-/* 26 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19772,6 +19676,137 @@ function camelize(string) {
 }
 
 module.exports = camelize;
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CHARACTORS = [
+    {
+        name: "スーザン",
+        image: "Screenshot_60.jpg"
+    }, {
+        name: "ロディ",
+        image: "Screenshot_61.jpg"
+    }, {
+        name: "エマ",
+        image: "Screenshot_62.jpg"
+    }, {
+        name: "フランク",
+        image: "Screenshot_63.jpg"
+    }, {
+        name: "トーマス",
+        image: "Screenshot_64.jpg"
+    }, {
+        name: "クリス",
+        image: "Screenshot_66.jpg"
+    }, {
+        name: "ジェシカ",
+        image: "Screenshot_67.jpg"
+    }, {
+        name: "サンドラ",
+        image: "Screenshot_68.jpg"
+    }, {
+        name: "フェイ",
+        image: "Screenshot_69.jpg"
+    }, {
+        name: "ヒュー",
+        image: "Screenshot_70.jpg"
+    }, {
+        name: "アンナ",
+        image: "Screenshot_71.jpg"
+    }, {
+        name: "マイク",
+        image: "Screenshot_72.jpg"
+    }, {
+        name: "エリック",
+        image: "Screenshot_73.jpg"
+    }, {
+        name: "バニラ",
+        image: "Screenshot_75.jpg"
+    }, {
+        name: "メアリー",
+        image: "Screenshot_76.jpg"
+    }, {
+        name: "ジェイ",
+        image: "Screenshot_77.jpg"
+    }, {
+        name: "ショーン",
+        image: "Screenshot_78.jpg"
+    }, {
+        name: "ローラ",
+        image: "Screenshot_79.jpg"
+    }, {
+        name: "ビル",
+        image: "Screenshot_80.jpg"
+    }, {
+        name: "ミカ",
+        image: "Screenshot_81.jpg"
+    }, {
+        name: "リリアン",
+        image: "Screenshot_82.jpg"
+    }, {
+        name: "メリル",
+        image: "Screenshot_83.jpg"
+    }, {
+        name: "ゲイル",
+        image: "Screenshot_84.jpg"
+    }
+];
+
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+class ElementUtil {
+    static builder(html) {
+        const container = document.createElement("div");
+        container.innerHTML = html;
+        if (container.children.length !== 1) {
+            throw new Error(`親要素はひとつまで 数: ${container.children.length} html: ${html}`);
+        }
+        const element = container.firstElementChild;
+        container.removeChild(element);
+        return element;
+    }
+    static getSvgIcon(icon, size = "m", className) {
+        return `
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon-svg icon-${size} ${className || ""}">
+            <use xlink:href="#${icon}"/>
+        </svg>`;
+    }
+}
+exports.ElementUtil = ElementUtil;
+class MathUtil {
+    static average(array) {
+        return MathUtil.sum(array) / array.length;
+    }
+    static sum(array) {
+        let sum = 0;
+        for (const num of array) {
+            sum += num;
+        }
+        return sum;
+    }
+    static getIndexOfMaxValue(array) {
+        return array.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0);
+    }
+    static tail(array) {
+        return array[array.length - 1];
+    }
+    static createKey() {
+        return "_" + Math.random().toString(36).substr(2, 9);
+    }
+}
+exports.MathUtil = MathUtil;
+
 
 /***/ })
 /******/ ]);
