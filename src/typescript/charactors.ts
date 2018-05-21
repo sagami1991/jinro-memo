@@ -1,0 +1,76 @@
+export interface ICharactor {
+    name: string;
+    image: string;
+}
+export const CHARACTORS: ICharactor[] = [
+    {
+        name: "スーザン",
+        image: "Screenshot_60.jpg"
+    }, {
+        name: "ロディ",
+        image: "Screenshot_61.jpg"
+    }, {
+        name: "エマ",
+        image: "Screenshot_62.jpg"
+    }, {
+        name: "フランク",
+        image: "Screenshot_63.jpg"
+    }, {
+        name: "トーマス",
+        image: "Screenshot_64.jpg"
+    }, {
+        name: "クリス",
+        image: "Screenshot_66.jpg"
+    }, {
+        name: "ジェシカ",
+        image: "Screenshot_67.jpg"
+    }, {
+        name: "サンドラ",
+        image: "Screenshot_68.jpg"
+    }, {
+        name: "フェイ",
+        image: "Screenshot_69.jpg"
+    }, {
+        name: "ヒュー",
+        image: "Screenshot_70.jpg"
+    }, {
+        name: "アンナ",
+        image: "Screenshot_71.jpg"
+    }, {
+        name: "マイク",
+        image: "Screenshot_72.jpg"
+    }, {
+        name: "エリック",
+        image: "Screenshot_73.jpg"
+    }, {
+        name: "バニラ",
+        image: "Screenshot_75.jpg"
+    }, {
+        name: "メアリー",
+        image: "Screenshot_76.jpg"
+    }, {
+        name: "ジェイ",
+        image: "Screenshot_77.jpg"
+    }, {
+        name: "ショーン",
+        image: "Screenshot_78.jpg"
+    }, {
+        name: "ローラ",
+        image: "Screenshot_79.jpg"
+    }, {
+        name: "ビル",
+        image: "Screenshot_80.jpg"
+    }, {
+        name: "ミカ",
+        image: "Screenshot_81.jpg"
+    }, {
+        name: "リリアン",
+        image: "Screenshot_82.jpg"
+    }, {
+        name: "メリル",
+        image: "Screenshot_83.jpg"
+    }, {
+        name: "ゲイル",
+        image: "Screenshot_84.jpg"
+    }
+];
