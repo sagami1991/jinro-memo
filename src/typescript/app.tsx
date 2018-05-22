@@ -2,8 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import { CHARACTORS, ICharactor } from "./charactors";
 import { MathUtil } from "./util";
-
-
+import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 interface UranaiRowProps {
     onRemove(): void;
 }
@@ -162,21 +161,54 @@ interface JinroCharactorProp {
     onDrop?(event: React.DragEvent<HTMLElement>): void;
 }
 
-class JinroCharactor extends React.Component<JinroCharactorProp> {
+interface ICharaJob {
+    title: string;
+    className: string;
+}
+
+class JinroCharactor extends React.Component<JinroCharactorProp, { job: ICharaJob}> {
     constructor(props: JinroCharactorProp) {
         super(props);
+        this.state = {} as any;
     }
 
     private onDragStart(event: React.DragEvent<HTMLElement>) {
         event.dataTransfer.setData("charactor", JSON.stringify(this.props));
     }
-
+    private changeJob(job: ICharaJob) {
+        this.setState({
+            job: job
+        });
+    }
     public render() {
+        const key = MathUtil.createKey();
+        const jobs: ICharaJob[] = [
+            {
+                title: "デフォルト",
+                className: ""
+            }, {
+                title: "片白",
+                className: "katashiro"
+            }, {
+                title: "占い",
+                className: "uranai"
+            }, {
+                title: "霊能",
+                className: "reino"
+            }, {
+                title: "処刑",
+                className: "syokei"
+            },{
+                title: "無残",
+                className: "muzan"
+            },
+        ]
         return (
         <div className="jinro-charactor" draggable={true} onDragStart={(e) => this.onDragStart(e)}
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => this.props.onDrop && this.props.onDrop(e)}
             >
+            <ContextMenuTrigger id={key} holdToDisplay={-1}>
             <img src={"charactor/" + this.props.image} className="charactor-image" />
             {(() => {
                 if (this.props.isUranaishi) {
@@ -188,6 +220,10 @@ class JinroCharactor extends React.Component<JinroCharactorProp> {
                 if (this.props.color === "black") {
                     return (<div className="chara-mark chara-mark-black">人狼</div>);
                 }
+                if (this.state.job) {
+                    return (<div className={"chara-mark chara-mark-" + this.state.job.className}>
+                        {this.state.job.title}</div>);
+                }
             })()}
             {(() => {
                 if (this.props.isSelectable) {
@@ -195,6 +231,11 @@ class JinroCharactor extends React.Component<JinroCharactorProp> {
                      onClick={() => this.props.onRemove!(this.props.name)}>✕</button>);
                 }
             })()}
+            </ContextMenuTrigger>
+            <ContextMenu id={key}>
+                {jobs.map((job) => <MenuItem key={job.title} onClick={() => this.changeJob(job)}>
+                    {job.title}</MenuItem>)}
+            </ContextMenu>
         </div>
         );
     }
