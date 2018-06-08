@@ -14,10 +14,13 @@ body {
     display: flex;
     flex-wrap: wrap;
     width: 680px;
-    margin-top: 4px;
+    margin-top: 20px;
     .jinro-charactor {
         margin-right: 4px;
         margin-bottom: 4px;
+        &:first-child {
+            margin-bottom: 200px;
+        }
     }
 }
 .jinro-charactor {
