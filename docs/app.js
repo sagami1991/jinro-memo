@@ -2036,9 +2036,7 @@ class JinroCharactor extends React.Component {
         if (GlobalData.dropResult) {
             this.changeJob(GlobalData.dropResult);
         }
-        else {
-            GlobalData.dropResult = undefined;
-        }
+        GlobalData.dropResult = undefined;
     }
     render() {
         const key = util_1.MathUtil.createKey();

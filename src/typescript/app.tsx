@@ -213,10 +213,8 @@ class JinroCharactor extends React.Component<JinroCharactorProp, ICharaState> {
     private onDragEnd() {
         if (GlobalData.dropResult) {
             this.changeJob(GlobalData.dropResult);
-        } else {
-            GlobalData.dropResult = undefined;
         }
-
+        GlobalData.dropResult = undefined;
     }
 
     public render() {
