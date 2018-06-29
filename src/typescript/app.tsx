@@ -38,6 +38,11 @@ class UranaiRow extends React.Component<UranaiRowProps, UranaiRowStates> {
         if (!data) {
             return;
         }
+        GlobalData.dropResult = {
+            title: "占いCO",
+            type: "co",
+            className: "uranaishi"
+        };
         const charactor: JinroCharactorProp = JSON.parse(data);
         this.setState({
             uranaiShi: charactor
@@ -107,6 +112,11 @@ class UranaiResultView extends React.Component<{onDrop(chara: JinroCharactorProp
         if (!data) {
             return;
         }
+        GlobalData.dropResult = {
+            title: color === "white" ? "片白" : "黒",
+            type: "color",
+            className: "katashiro"
+        };
         const charactor: JinroCharactorProp = JSON.parse(data);
         charactor.color = color;
         this.props.onDrop(charactor);
@@ -163,10 +173,20 @@ interface JinroCharactorProp {
 
 interface ICharaJob {
     title: string;
+    type: "co" | "color" | "dead" | "";
     className: string;
 }
 
-class JinroCharactor extends React.Component<JinroCharactorProp, { job: ICharaJob}> {
+interface ICharaState {
+    co?: string;
+    color?: string;
+    dead?: string;
+}
+
+class GlobalData {
+    public static dropResult: ICharaJob | undefined = undefined;
+}
+class JinroCharactor extends React.Component<JinroCharactorProp, ICharaState> {
     constructor(props: JinroCharactorProp) {
         super(props);
         this.state = {} as any;
@@ -175,31 +195,64 @@ class JinroCharactor extends React.Component<JinroCharactorProp, { job: ICharaJo
     private onDragStart(event: React.DragEvent<HTMLElement>) {
         event.dataTransfer.setData("charactor", JSON.stringify(this.props));
     }
+
     private changeJob(job: ICharaJob) {
+        if (job.type === "") {
+            this.setState({
+                co: undefined,
+                color: undefined,
+                dead: undefined
+            });
+            return;
+        }
         this.setState({
-            job: job
+            [job.type]: job.title
         });
     }
+
+    private onDragEnd() {
+        if (GlobalData.dropResult) {
+            this.changeJob(GlobalData.dropResult);
+        } else {
+            GlobalData.dropResult = undefined;
+        }
+
+    }
+
     public render() {
         const key = MathUtil.createKey();
         const jobs: ICharaJob[] = [
             {
-                title: "デフォルト",
+                title: "リセット",
+                type: "",
                 className: ""
             }, {
-                title: "片白",
-                className: "katashiro"
-            }, {
-                title: "占い",
+                title: "占いCO",
+                type: "co",
                 className: "uranai"
             }, {
-                title: "霊能",
+                title: "霊能CO",
+                type: "co",
                 className: "reino"
             }, {
+                title: "片白",
+                type: "color",
+                className: "katashiro"
+            }, {
+                title: "確定白",
+                type: "color",
+                className: "katashiro"
+            }, {
+                title: "黒",
+                type: "color",
+                className: "katashiro"
+            }, {
                 title: "処刑",
+                type: "dead",
                 className: "syokei"
-            },{
+            }, {
                 title: "無残",
+                type: "dead",
                 className: "muzan"
             },
         ]
@@ -207,6 +260,7 @@ class JinroCharactor extends React.Component<JinroCharactorProp, { job: ICharaJo
         <div className="jinro-charactor" draggable={true} onDragStart={(e) => this.onDragStart(e)}
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => this.props.onDrop && this.props.onDrop(e)}
+            onDragEnd={(e) => this.onDragEnd()}
             >
             <ContextMenuTrigger id={key} holdToDisplay={-1}>
             <img src={"charactor/" + this.props.image} className="charactor-image" />
@@ -220,9 +274,20 @@ class JinroCharactor extends React.Component<JinroCharactorProp, { job: ICharaJo
                 if (this.props.color === "black") {
                     return (<div className="chara-mark chara-mark-black">人狼</div>);
                 }
-                if (this.state.job) {
-                    return (<div className={"chara-mark chara-mark-" + this.state.job.className}>
-                        {this.state.job.title}</div>);
+            })()}
+            {(() => {
+                if (this.state.co) {
+                    return (<div className={`chara-mark chara-mark-co`}>{this.state.co}</div>);
+                }
+            })()}
+            {(() => {
+                if (this.state.color) {
+                    return (<div className={`chara-mark chara-mark-color`}>{this.state.color}</div>);
+                }
+            })()}
+            {(() => {
+                if (this.state.dead) {
+                    return (<div className={`chara-mark chara-mark-dead`}>{this.state.dead}</div>);
                 }
             })()}
             {(() => {
@@ -277,7 +342,7 @@ class SelectCharctorView extends React.Component<{}, {charactors: ICharactor[]}>
             {this.state.charactors.map((chara, i) => {
                 return (<JinroCharactor name={chara.name}
                   onRemove={(name) => this.onRemove(name)}
-                 image={chara.image} isSelectable={true} key={i}
+                 image={chara.image} isSelectable={true} key={chara.name}
                  onDrop={(e) => this.dragEnd(e, i)}
                   />);
             })}
@@ -288,6 +353,7 @@ class SelectCharctorView extends React.Component<{}, {charactors: ICharactor[]}>
 
 class MainView extends React.Component<{}, {uranaiRows: string[], copyText: string}> {
     private uranaiRows: UranaiRow[];
+    public dropResult: "uranaiShi" | "black" | "white" | undefined;
     constructor(props: any) {
         super(props);
         this.state = {

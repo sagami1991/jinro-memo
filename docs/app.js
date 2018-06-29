@@ -1930,6 +1930,11 @@ class UranaiRow extends React.Component {
         if (!data) {
             return;
         }
+        GlobalData.dropResult = {
+            title: "占いCO",
+            type: "co",
+            className: "uranaishi"
+        };
         const charactor = JSON.parse(data);
         this.setState({
             uranaiShi: charactor
@@ -1975,6 +1980,11 @@ class UranaiResultView extends React.Component {
         if (!data) {
             return;
         }
+        GlobalData.dropResult = {
+            title: color === "white" ? "片白" : "黒",
+            type: "color",
+            className: "katashiro"
+        };
         const charactor = JSON.parse(data);
         charactor.color = color;
         this.props.onDrop(charactor);
@@ -1998,6 +2008,9 @@ class UranaiResultView extends React.Component {
             React.createElement("div", { className: "result-child result-right " + (this.state.onDropOver === "black" ? "result-drop-over" : ""), onDragOver: (e) => e.preventDefault(), onDrop: (e) => this.dragEnd(e, "black"), onDragEnter: () => this.onDropOver("black") }, "\u9ED2")));
     }
 }
+class GlobalData {
+}
+GlobalData.dropResult = undefined;
 class JinroCharactor extends React.Component {
     constructor(props) {
         super(props);
@@ -2007,34 +2020,64 @@ class JinroCharactor extends React.Component {
         event.dataTransfer.setData("charactor", JSON.stringify(this.props));
     }
     changeJob(job) {
+        if (job.type === "") {
+            this.setState({
+                co: undefined,
+                color: undefined,
+                dead: undefined
+            });
+            return;
+        }
         this.setState({
-            job: job
+            [job.type]: job.title
         });
+    }
+    onDragEnd() {
+        if (GlobalData.dropResult) {
+            this.changeJob(GlobalData.dropResult);
+        }
+        else {
+            GlobalData.dropResult = undefined;
+        }
     }
     render() {
         const key = util_1.MathUtil.createKey();
         const jobs = [
             {
-                title: "デフォルト",
+                title: "リセット",
+                type: "",
                 className: ""
             }, {
-                title: "片白",
-                className: "katashiro"
-            }, {
-                title: "占い",
+                title: "占いCO",
+                type: "co",
                 className: "uranai"
             }, {
-                title: "霊能",
+                title: "霊能CO",
+                type: "co",
                 className: "reino"
             }, {
+                title: "片白",
+                type: "color",
+                className: "katashiro"
+            }, {
+                title: "確定白",
+                type: "color",
+                className: "katashiro"
+            }, {
+                title: "黒",
+                type: "color",
+                className: "katashiro"
+            }, {
                 title: "処刑",
+                type: "dead",
                 className: "syokei"
             }, {
                 title: "無残",
+                type: "dead",
                 className: "muzan"
             },
         ];
-        return (React.createElement("div", { className: "jinro-charactor", draggable: true, onDragStart: (e) => this.onDragStart(e), onDragOver: (e) => e.preventDefault(), onDrop: (e) => this.props.onDrop && this.props.onDrop(e) },
+        return (React.createElement("div", { className: "jinro-charactor", draggable: true, onDragStart: (e) => this.onDragStart(e), onDragOver: (e) => e.preventDefault(), onDrop: (e) => this.props.onDrop && this.props.onDrop(e), onDragEnd: (e) => this.onDragEnd() },
             React.createElement(react_contextmenu_1.ContextMenuTrigger, { id: key, holdToDisplay: -1 },
                 React.createElement("img", { src: "charactor/" + this.props.image, className: "charactor-image" }),
                 (() => {
@@ -2047,8 +2090,20 @@ class JinroCharactor extends React.Component {
                     if (this.props.color === "black") {
                         return (React.createElement("div", { className: "chara-mark chara-mark-black" }, "\u4EBA\u72FC"));
                     }
-                    if (this.state.job) {
-                        return (React.createElement("div", { className: "chara-mark chara-mark-" + this.state.job.className }, this.state.job.title));
+                })(),
+                (() => {
+                    if (this.state.co) {
+                        return (React.createElement("div", { className: `chara-mark chara-mark-co` }, this.state.co));
+                    }
+                })(),
+                (() => {
+                    if (this.state.color) {
+                        return (React.createElement("div", { className: `chara-mark chara-mark-color` }, this.state.color));
+                    }
+                })(),
+                (() => {
+                    if (this.state.dead) {
+                        return (React.createElement("div", { className: `chara-mark chara-mark-dead` }, this.state.dead));
                     }
                 })(),
                 (() => {
@@ -2086,7 +2141,7 @@ class SelectCharctorView extends React.Component {
     }
     render() {
         return (React.createElement("div", { className: "select-charactor" }, this.state.charactors.map((chara, i) => {
-            return (React.createElement(JinroCharactor, { name: chara.name, onRemove: (name) => this.onRemove(name), image: chara.image, isSelectable: true, key: i, onDrop: (e) => this.dragEnd(e, i) }));
+            return (React.createElement(JinroCharactor, { name: chara.name, onRemove: (name) => this.onRemove(name), image: chara.image, isSelectable: true, key: chara.name, onDrop: (e) => this.dragEnd(e, i) }));
         })));
     }
 }

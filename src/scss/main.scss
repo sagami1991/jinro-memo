@@ -50,10 +50,26 @@ body {
     .chara-mark {
         position: absolute;
         color: white;
-        bottom: 1px;
         border-radius: 4px;
         font-size: 11px;
         padding: 0 3px;
+        bottom: 1px;
+        &.chara-mark-co {
+            top: 4px;
+            bottom: auto;
+            background-color: darkcyan;
+        }
+        &.chara-mark-color {
+            top: 28px;
+            bottom: auto;
+            background-color: #efefefd4;
+            color: black;
+        }
+        &.chara-mark-dead {
+            bottom: 1px;
+            background-color: rgba(29, 29, 31, 0.83);
+            color: #ff6060
+        }
         &.chara-mark-uranai {
             background-color: darkcyan;
         }
